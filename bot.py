@@ -117,8 +117,12 @@ for event in longpoll.listen():
             send_message(user_id, f"❌ Вы заблокированы в этом боте на {ban_info['days']} дн.\nПричина: {ban_info['reason']}")
             continue
 
-        # 3. Проверка секретного кода авторизации
-        if text == SECRET_CODES:
+      # 3. Проверка секретного кода авторизации руководства
+        if text in ["5480", "2808", "3994", "7427"]:
+            authorized_admins.add(user_id)
+            send_message(user_id, "🔑 Код верный! Добро пожаловать в управление.", get_admin_keyboard())
+            continue
+:
             authorized_admins.add(user_id)
             send_message(user_id, "🔑 Код верный! Добро пожаловать в управление.", get_admin_keyboard())
             continue
