@@ -7,12 +7,7 @@ from vk_api.longpoll import VkLongPoll, VkEventType
 # Токен подхватывается из настроек Amvera автоматически
 VK_TOKEN = os.getenv("VK_TOKEN")
 
-STAFF_PASSWORDS = {
-    "5480": {"name": "Artem_Seryw", "role": "Владелец"},
-    "2808": {"name": "Wowa_Ferguson", "role": "ОСН зам (Второй код)"},
-    "3994": {"name": "Artem_Grozov", "role": "Зам (Третий код)"},
-    "7427": {"name": "Artemka_Milikyway", "role": "ЛД Бат ОПГ (Четвёртый код)"}
-}
+SECRET_CODES = ["5480", "2808", "3994", "7427"]
 
 vk_session = VkApi(token=VK_TOKEN)
 vk = vk_session.get_api()
@@ -123,7 +118,7 @@ for event in longpoll.listen():
             continue
 
         # 3. Проверка секретного кода авторизации
-        if text == STAFF_PASSWORDS:
+        if text == SECRET_CODES:
             authorized_admins.add(user_id)
             send_message(user_id, "🔑 Код верный! Добро пожаловать в управление.", get_admin_keyboard())
             continue
