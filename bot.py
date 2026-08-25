@@ -122,7 +122,7 @@ for event in longpoll.listen():
             authorized_admins.add(user_id)
             send_message(user_id, "🔑 Код верный! Добро пожаловать в управление.", get_admin_keyboard())
             continue
-:
+
             authorized_admins.add(user_id)
             send_message(user_id, "🔑 Код верный! Добро пожаловать в управление.", get_admin_keyboard())
             continue
