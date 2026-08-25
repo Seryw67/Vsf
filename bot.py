@@ -41,7 +41,7 @@ def get_main_keyboard():
     }
     return json.dumps(keyboard, ensure_ascii=False)
 
-# Меню админа
+# Исправленная клавиатура админ-панели
 def get_admin_keyboard():
     keyboard = {
         "one_time": False,
@@ -51,6 +51,7 @@ def get_admin_keyboard():
                 {"action": {"type": "text", "label": "📦 Заказы"}, "color": "positive"}
             ],
             [
+                # Добавили эмодзи папки, чтобы кнопка точно срабатывала
                 {"action": {"type": "text", "label": "📁 Менеджер файлов"}, "color": "secondary"},
                 {"action": {"type": "text", "label": "📜 Список команд"}, "color": "primary"}
             ],
@@ -61,6 +62,7 @@ def get_admin_keyboard():
     }
     return json.dumps(keyboard, ensure_ascii=False)
 
+
 # Клавиатура Файлового Менеджера (Кнопка "Договор" удалена)
 def get_fm_keyboard():
     keyboard = {
@@ -68,10 +70,8 @@ def get_fm_keyboard():
         "buttons": [
             [
                 {"action": {"type": "text", "label": "📁 Выговоры"}, "color": "primary"},
-                {"action": {"type": "text", "label": "📁 Сотрудники"}, "color": "primary"},
         
             
-            send_message(user_id, staff_text)
 
             ],
             [
@@ -267,34 +267,6 @@ for event in longpoll.listen():
         elif text == "📁 Выговоры" and user_id in authorized_admins:
             send_message(user_id, "📁 Файл [Выговоры]:\nНа данный момент выговоры у сотрудников отсутствуют.")
 
-        elif text == "📁 Сотрудники" and user_id in authorized_admins:
-            staff_text = (
-                "📁 Файл [Сотрудники]:\n\n"
-                "👑 КОМАНДОВАНИЕ 👑\n"
-                "• Директор: @Artem_Seryw\n"
-                "• ОСН зам: @Wowa_Ferguson\n"
-                "• Зам: @Artem_Grozov\n"
-                "• Зам: @Liza_Tomka\n\n"
-                "✨ ПОМОЩНИКИ ✨\n"
-                "• Помощник: @Darkness_Shadow\n\n"
-                "👥 ОТРЯДЫ 👥\n"
-                "• Отряд первые: @Andreyka_Bogdanov\n"
-                "  — @Madara_Damirov\n"
-                "  — @Paxan_Marlboro\n"
-                "  — @Stas_Kapibarov\n\n"
-                "🛡️ ОХРАНА / ВОДИТЕЛИ 🛡️\n"
-                "• Охрана#1: [Вакансия свободна]\n"
-                "• Охрана#2: @Magish_Wenzzexov\n"
-                "• Водители: @Vova_Arrows\n\n"
-                "📦 ДОСТАВЩИКИ / АРЕНДАТОРЫ 📦\n"
-                "• Арендатор: @Alexs_Zews\n"
-                "• Доставщик: @Dima_Sergervicn"
-            )
-            send_message(user_id, staff_text)
-
-
-        elif text == "📁 Договор" and user_id in authorized_admins:
-            send_message(user_id, "📁 Файл [Договор]:\nШаблон договора купли-продажи магазина находится в архиве.")
 
         elif text == "📁 ЧС" and user_id in authorized_admins:
             if not banned_users:
