@@ -9,9 +9,9 @@ VK_TOKEN = os.getenv("VK_TOKEN")
 
 STAFF_PASSWORDS = {
     "5480": {"name": "Artem_Seryw", "role": "Владелец"},
-    "2808": {"name": "Wowa_Ferguson", "role": "ОСН зам"},
-    "3994": {"name": "Artem_Grozov", "role": "Зам"},
-    "7427": {"name": "Artemka_Milikyway", "role": "ЛД Бат ОПГ"}
+    "2808": {"name": "Wowa_Ferguson", "role": "ОСН зам (Второй код)"},
+    "3994": {"name": "Artem_Grozov", "role": "Зам (Третий код)"},
+    "7427": {"name": "Artemka_Milikyway", "role": "ЛД Бат ОПГ (Четвёртый код)"}
 }
 
 vk_session = VkApi(token=VK_TOKEN)
