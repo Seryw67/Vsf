@@ -61,21 +61,44 @@ def get_admin_keyboard():
     }
     return json.dumps(keyboard, ensure_ascii=False)
 
-# Клавиатура Файлового Менеджера с новыми категориями
+# Клавиатура Файлового Менеджера (Кнопка "Договор" удалена)
 def get_fm_keyboard():
     keyboard = {
         "one_time": False,
         "buttons": [
             [
                 {"action": {"type": "text", "label": "📁 Выговоры"}, "color": "primary"},
-                {"action": {"type": "text", "label": "📁 Сотрудники"}, "color": "primary"}
+        elif text == "📁 Сотрудники" and user_id in authorized_admins:
+            staff_text = (
+                "📁 Файл [Сотрудники]:\n\n"
+                "👑 КОМАНДОВАНИЕ 👑\n"
+                "• Директор: @Artem_Seryw\n"
+                "• ОСН зам: @Wowa_Ferguson\n"
+                "• Зам: @Artem_Grozov\n"
+                "• Зам: @Liza_Tomka\n\n"
+                "✨ ПОМОЩНИКИ ✨\n"
+                "• Помощник: @Darkness_Shadow\n\n"
+                "👥 ОТРЯДЫ 👥\n"
+                "• Отряд первые: @Andreyka_Bogdanov\n"
+                "  — @Madara_Damirov\n"
+                "  — @Paxan_Marlboro\n"
+                "  — @Stas_Kapibarov\n\n"
+                "🛡️ ОХРАНА / ВОДИТЕЛИ 🛡️\n"
+                "• Охрана#1: [Вакансия свободна]\n"
+                "• Охрана#2: @Magish_Wenzzexov\n"
+                "• Водители: @Vova_Arrows\n\n"
+                "📦 ДОСТАВЩИКИ / АРЕНДАТОРЫ 📦\n"
+                "• Арендатор: @Alexs_Zews\n"
+                "• Доставщик: @Dima_Sergervicn"
+            )
+            send_message(user_id, staff_text)
+
             ],
             [
-                {"action": {"type": "text", "label": "📁 Договор"}, "color": "primary"},
-                {"action": {"type": "text", "label": "📁 ЧС"}, "color": "primary"}
+                {"action": {"type": "text", "label": "📁 ЧС"}, "color": "primary"},
+                {"action": {"type": "text", "label": "📁 Архив"}, "color": "primary"}
             ],
             [
-                {"action": {"type": "text", "label": "📁 Архив"}, "color": "primary"},
                 {"action": {"type": "text", "label": "📁 Список всех заказов"}, "color": "positive"}
             ],
             [
