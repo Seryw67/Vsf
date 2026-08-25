@@ -61,6 +61,30 @@ def get_admin_keyboard():
     }
     return json.dumps(keyboard, ensure_ascii=False)
 
+# Клавиатура Файлового Менеджера с новыми категориями
+def get_fm_keyboard():
+    keyboard = {
+        "one_time": False,
+        "buttons": [
+            [
+                {"action": {"type": "text", "label": "📁 Выговоры"}, "color": "primary"},
+                {"action": {"type": "text", "label": "📁 Сотрудники"}, "color": "primary"}
+            ],
+            [
+                {"action": {"type": "text", "label": "📁 Договор"}, "color": "primary"},
+                {"action": {"type": "text", "label": "📁 ЧС"}, "color": "primary"}
+            ],
+            [
+                {"action": {"type": "text", "label": "📁 Архив"}, "color": "primary"},
+                {"action": {"type": "text", "label": "📁 Список всех заказов"}, "color": "positive"}
+            ],
+            [
+                {"action": {"type": "text", "label": "⚙️ Панель admin"}, "color": "secondary"}
+            ]
+        ]
+    }
+    return json.dumps(keyboard, ensure_ascii=False)
+
 # Функция для отправки сообщений
 def send_message(user_id, text, keyboard=None):
     params = {"user_id": user_id, "message": text, "random_id": 0}
@@ -68,8 +92,7 @@ def send_message(user_id, text, keyboard=None):
         params["keyboard"] = keyboard
     vk.messages.send(**params)
 
-print("Полная версия бота магазина успешно запущена на Amvera...")
-
+print("Полная версия бота магазина со встроенным ФМ запущена на Amvera...")
 # Главный цикл чтения сообщений
 for event in longpoll.listen():
     if event.type == VkEventType.MESSAGE_NEW and event.to_me:
@@ -96,6 +119,7 @@ for event in longpoll.listen():
             authorized_admins.add(user_id)
             send_message(user_id, "🔑 Код верный! Добро пожаловать в управление.", get_admin_keyboard())
             continue
+
         # 4. Перехват ввода количества товара и расчет стоимости
         if user_id in user_modes:
             current_mode = user_modes[user_id]
@@ -130,12 +154,15 @@ for event in longpoll.listen():
             total_price = count * price_per_item
             
             order_id = len(all_orders) + 1
+            current_date_str = datetime.now().strftime("%d.%m.%Y %H:%M")
+
             all_orders.append({
                 "id": order_id,
                 "user_id": user_id,
                 "product": product_name,
                 "count": count,
                 "price": total_price,
+                "date": current_date_str,
                 "status": "В обработке"
             })
             
@@ -150,23 +177,7 @@ for event in longpoll.listen():
                 get_main_keyboard()
             )
             
-            # 🔔 МГНОВЕННОЕ УВЕДОМЛЕНИЕ ВСЕМ АДМИНАМ В КАНАЛ
-            admin_alert = (
-                f"🔔 Новый заказ №{order_id}!\n"
-                f"👤 Покупатель: {user_id}\n"
-                f"📦 Товар: {product_name} ({count} шт.)\n"
-                f"💵 Сумма покупки: {total_price:,} руб."
-            )
-            for admin in authorized_admins:
-                try:
-                    send_message(admin, admin_alert)
-                except Exception:
-                    pass
-            continue
-
-            
-            
-            # 🔔 МГНОВЕННОЕ УВЕДОМЛЕНИЕ ВСЕМ АДМИНАМ В КАНАЛ
+            # 🔔 МГНОВЕННОЕ УВЕДОМЛЕНИЕ ВСЕМ АДМИНАМ
             admin_alert = (
                 f"🔔 Новый заказ №{order_id}!\n"
                 f"👤 Покупатель: {user_id}\n"
@@ -239,36 +250,61 @@ for event in longpoll.listen():
                 send_message(user_id, "Вы уже авторизованы. Меню admin:", get_admin_keyboard())
             else:
                 send_message(user_id, "Введите ваш личный код доступа")
-
         # =====================================================================
         # 6. ОБРАБОТКА КНОПОК ПАНЕЛИ АДМИНИСТРАТОРА
         # =====================================================================
         elif text == "💼 Панель" and user_id in authorized_admins:
             send_message(user_id, f"ℹ️ Статистика магазина:\nВсего заказов в системе: {len(all_orders)}\nЗабанено пользователей: {len(banned_users)}\nВсего клиентов в базе: {len(all_shop_users)}")
 
+        # Открытие Файлового Менеджера
         elif text == "📁 Менеджер файлов" and user_id in authorized_admins:
-            send_message(user_id, "📁 Менеджер файлов временно находится в разработке.")        # 🔥 ОТДЕЛЬНЫЙ КОД: Вывод списка всех текстовых команд админа
-        
+            send_message(user_id, "Файловый менеджер. Выберите файл ниже:", get_fm_keyboard())
+
+        # Категории Файлового Менеджера
+        elif text == "📁 Выговоры" and user_id in authorized_admins:
+            send_message(user_id, "📁 Файл [Выговоры]:\nНа данный момент выговоры у сотрудников отсутствуют.")
+
+        elif text == "📁 Сотрудники" and user_id in authorized_admins:
+            send_message(user_id, "📁 Файл [Сотрудники]:\nСписок персонала пуст. Вы единственный администратор.")
+
+        elif text == "📁 Договор" and user_id in authorized_admins:
+            send_message(user_id, "📁 Файл [Договор]:\nШаблон договора купли-продажи магазина находится в архиве.")
+
+        elif text == "📁 ЧС" and user_id in authorized_admins:
+            if not banned_users:
+                send_message(user_id, "📁 Файл [ЧС]:\nВ чёрном списке магазина сейчас никого нет.")
+            else:
+                chs_text = "📁 Файл [ЧС] (Список заблокированных пользователей):\n\n"
+                for b_id, b_info in banned_users.items():
+                    chs_text += f"👤 Пользователь ID: {b_id}\nСрок: {b_info['days']} дн. | Причина: {b_info['reason']}\n------------------\n"
+                send_message(user_id, chs_text)
+
+        elif text == "📁 Архив" and user_id in authorized_admins:
+            send_message(user_id, "📁 Файл [Архив]:\nАрхив пуст. Старые документы не найдены.")
+
+        elif text == "📁 Список всех заказов" and user_id in authorized_admins:
+            if not all_orders:
+                send_message(user_id, "📁 Файл [Список всех заказов]:\nЗаказов в системе пока нет.")
+            else:
+                report_text = "📁 Файл [Список всех заказов]:\n\n"
+                for o in all_orders:
+                    display_status = "На рассмотрении" if o["status"] == "В обработке" else o["status"]
+                    report_text += f"👤 ID: {o['user_id']} | 📦 {o['product']} ({o['count']} шт.) | 💰 {o['price']:,} руб. | 📅 {o['date']} | 📍 {display_status}\n"
+                    report_text += "--------------------------------------------------------\n"
+                send_message(user_id, report_text)
+
+        # Вывод списка всех текстовых команд админа
         elif text == "📜 Список команд" and user_id in authorized_admins:
             commands_list = (
                 "📜 Шпаргалка по командам администратора:\n\n"
                 "📢 ОБЩЕЕ ОБЪЯВЛЕНИЕ:\n"
-                "👉 /post [текст вашего поста]\n"
-                "Делает мгновенную массовую рассылку сообщений всем клиентам бота.\n"
-                "Пример: /post Внимание! Завтра скидки на весь чай 20%!\n\n"
+                "👉 /post [текст вашего поста]\n\n"
                 "⛔ БЛОКИРОВКА:\n"
-                "👉 /ban [юзернейм] [дней] [причина]\n"
-                "Выдает бан пользователю по короткому имени. Бот начнет его игнорировать.\n"
-                "Пример: /ban ivan_ivanov 7 спам\n\n"
+                "👉 /ban [юзернейм] [дней] [причина]\n\n"
                 "⚠️ ПРЕДУПРЕЖДЕНИЯ:\n"
-                "👉 /warn [юзернейм] [дней] [причина]\n"
-                "Выдает варн (3/3 варна автоматический бан на 30 дней).\n"
-                "Пример: /warn petrov 3 флуд\n\n"
+                "👉 /warn [юзернейм] [дней] [причина]\n\n"
                 "📦 СТАТУСЫ ЗАКАЗОВ:\n"
-                "👉 /s [номер_заказа] [статус]\n"
-                "Быстрая смена статуса любого заказа через текст.\n"
-                "Доступные статусы: на рассмотрении, выполняются, выполнены, закрыты, отказаны.\n"
-                "Пример: /s 1 выполнены"
+                "👉 /s [номер_заказа] [статус]"
             )
             send_message(user_id, commands_list)
 
@@ -362,23 +398,22 @@ for event in longpoll.listen():
                         send_message(t_user, f"🔔 Статус вашего заказа №{order_num} изменился на: '{status_label}'")
                 except Exception: pass
 
-        # Команда /post
-        elif text.startswith("/post ") and user_id in authorized_admins:
+        # Короткая текстовая команда смены статуса (/s)
+        elif text.startswith("/s ") and user_id in authorized_admins:
             try:
-                post_text = text.replace("/post ", "").strip()
-                if not post_text:
-                    send_message(user_id, "❌ Нельзя отправить пустой пост!")
-                    continue
-                send_message(user_id, f"📢 Запуск рассылки для {len(all_shop_users)} пользователей...")
-                success_count = 0
-                for u_id in all_shop_users:
-                    try:
-                        send_message(u_id, f"📢 ОБЪЯВЛЕНИЕ ОТ МАГАЗИНА:\n\n{post_text}")
-                        success_count += 1
-                    except Exception: pass
-                send_message(user_id, f"✅ Рассылка успешно завершена! Доставлено: {success_count}/{len(all_shop_users)}.")
-            except Exception: pass
-
+                parts = text.split(maxsplit=2)
+                order_idx = int(parts[1]) - 1
+                new_status = parts[2].strip()
+                status_mapping = {
+                    "на рассмотрении": "В обработке", "в обработке": "В обработке",
+                    "выполняются": "Выполняются", "выполнены": "Выполнены",
+                    "закрыты": "Закрыто", "закрыто": "Закрыто", "отказаны": "Отказ", "отказ": "Отказ"
+                }
+                resolved_status = status_mapping.get(new_status.lower())
+                if resolved_status:
+                    target_order = all_orders[order_idx]
+                    target_order["status"] = resolved_status
+                    t_user = target_order["user_id"]
         # Короткая текстовая команда смены статуса (/s)
         elif text.startswith("/s ") and user_id in authorized_admins:
             try:
@@ -401,6 +436,8 @@ for event in longpoll.listen():
                             del active_orders[t_user][t_prod]
                     send_message(user_id, f"✅ Статус заказа №{order_idx + 1} изменен на '{resolved_status}'")
                     send_message(t_user, f"🔔 Статус вашего заказа №{order_idx + 1} изменился на: '{resolved_status}'")
+                else:
+                    send_message(user_id, "❌ Допустимые статусы: На рассмотрении, Выполняются, Выполнены, Закрыты, Отказаны")
             except Exception:
                 send_message(user_id, "❌ Формат: /s [номер] [статус]")
 
@@ -420,52 +457,40 @@ for event in longpoll.listen():
                     except Exception: pass
                 else: send_message(user_id, f"❌ Пользователь '{screen_name}' не найден.")
             except Exception: send_message(user_id, "❌ Формат: /ban [юзернейм] [дней] [причина]")
-        
-        # КОМАНДА /warn (ВЫДАЧА ПРЕДУПРЕЖДЕНИЙ)
+
+        # Команда /warn
         elif text.startswith("/warn ") and user_id in authorized_admins:
             try:
                 parts = text.split(maxsplit=3)
                 screen_name = parts[1].strip().replace("https://vk.com", "").replace("://vk.com", "").replace("@", "")
                 days = int(parts[2])
                 reason = parts[3]
-                
                 vk_response = vk.utils.resolveScreenName(screen_name=screen_name)
-                
                 if vk_response and vk_response.get("type") == "user":
                     target_vk_id = vk_response["object_id"]
-                    
                     expire_time = datetime.now() + timedelta(days=days)
                     expire_str = expire_time.strftime("%d.%m.%Y %H:%M")
-                    
-                    if target_vk_id not in user_warns: 
-                        user_warns[target_vk_id] = []
-                        
+                    if target_vk_id not in user_warns: user_warns[target_vk_id] = []
                     user_warns[target_vk_id].append({"expires": expire_time, "reason": reason})
                     current_warns_count = len(user_warns[target_vk_id])
-                    
                     send_message(user_id, f"✅ Выдано предупреждение @{screen_name}.\nВарнов: {current_warns_count}/3\nИстекает: {expire_str}\nПричина: {reason}")
-                    
                     if current_warns_count >= 3:
                         banned_users[target_vk_id] = {"days": 30, "reason": "Накоплено 3/3 варна"}
                         send_message(user_id, f"🚨 Пользователь @{screen_name} забанен на 30 дней за 3/3 варна!")
-                        try: 
-                            send_message(target_vk_id, f"❌ Вы получили 3-й варн и забанены на 30 дней!\nПричина: {reason}")
+                        try: send_message(target_vk_id, f"❌ Вы получили 3-й варн и забанены на 30 дней!\nПричина: {reason}")
                         except Exception: pass
                     else:
-                        try: 
-                            send_message(target_vk_id, f"⚠️ Вам выдано предупреждение!\nАктивных варнов: {current_warns_count}/3\nПричина: {reason}\nИстекает: {expire_str}")
+                        try: send_message(target_vk_id, f"⚠️ Вам выдано предупреждение!\nАктивных варнов: {current_warns_count}/3\nПричина: {reason}\nИстекает: {expire_str}")
                         except Exception: pass
-                else: 
-                    send_message(user_id, f"❌ Пользователь '{screen_name}' не найден.")
-            except Exception: 
-                send_message(user_id, "❌ Формат: /warn [юзернейм] [дней] [причина]")
+                else: send_message(user_id, f"❌ Пользователь '{screen_name}' не найден.")
+            except Exception: send_message(user_id, "❌ Формат: /warn [юзернейм] [дней] [причина]")
 
-        # КОМАНДА /post (ОБЩЕЕ ОБЪЯВЛЕНИЕ / РАССЫЛКА)
+        # Команда /post
         elif text.startswith("/post ") and user_id in authorized_admins:
             try:
                 post_text = text.replace("/post ", "").strip()
                 if not post_text:
-                    send_message(user_id, "❌ Нельзя отправить пустой пост!")
+                    send_message(user_id, "❌ Нельзя отправить пустой post!")
                     continue
                 send_message(user_id, f"📢 Запуск рассылки для {len(all_shop_users)} пользователей...")
                 success_count = 0
@@ -476,6 +501,3 @@ for event in longpoll.listen():
                     except Exception: pass
                 send_message(user_id, f"✅ Рассылка успешно завершена! Доставлено: {success_count}/{len(all_shop_users)}.")
             except Exception: pass
-
-
-
