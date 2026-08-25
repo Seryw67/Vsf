@@ -68,29 +68,9 @@ def get_fm_keyboard():
         "buttons": [
             [
                 {"action": {"type": "text", "label": "📁 Выговоры"}, "color": "primary"},
-        elif text == "📁 Сотрудники" and user_id in authorized_admins:
-            staff_text = (
-                "📁 Файл [Сотрудники]:\n\n"
-                "👑 КОМАНДОВАНИЕ 👑\n"
-                "• Директор: @Artem_Seryw\n"
-                "• ОСН зам: @Wowa_Ferguson\n"
-                "• Зам: @Artem_Grozov\n"
-                "• Зам: @Liza_Tomka\n\n"
-                "✨ ПОМОЩНИКИ ✨\n"
-                "• Помощник: @Darkness_Shadow\n\n"
-                "👥 ОТРЯДЫ 👥\n"
-                "• Отряд первые: @Andreyka_Bogdanov\n"
-                "  — @Madara_Damirov\n"
-                "  — @Paxan_Marlboro\n"
-                "  — @Stas_Kapibarov\n\n"
-                "🛡️ ОХРАНА / ВОДИТЕЛИ 🛡️\n"
-                "• Охрана#1: [Вакансия свободна]\n"
-                "• Охрана#2: @Magish_Wenzzexov\n"
-                "• Водители: @Vova_Arrows\n\n"
-                "📦 ДОСТАВЩИКИ / АРЕНДАТОРЫ 📦\n"
-                "• Арендатор: @Alexs_Zews\n"
-                "• Доставщик: @Dima_Sergervicn"
-            )
+                {"action": {"type": "text", "label": "📁 Сотрудники"}, "color": "primary"},
+        
+            
             send_message(user_id, staff_text)
 
             ],
@@ -288,7 +268,30 @@ for event in longpoll.listen():
             send_message(user_id, "📁 Файл [Выговоры]:\nНа данный момент выговоры у сотрудников отсутствуют.")
 
         elif text == "📁 Сотрудники" and user_id in authorized_admins:
-            send_message(user_id, "📁 Файл [Сотрудники]:\nСписок персонала пуст. Вы единственный администратор.")
+            staff_text = (
+                "📁 Файл [Сотрудники]:\n\n"
+                "👑 КОМАНДОВАНИЕ 👑\n"
+                "• Директор: @Artem_Seryw\n"
+                "• ОСН зам: @Wowa_Ferguson\n"
+                "• Зам: @Artem_Grozov\n"
+                "• Зам: @Liza_Tomka\n\n"
+                "✨ ПОМОЩНИКИ ✨\n"
+                "• Помощник: @Darkness_Shadow\n\n"
+                "👥 ОТРЯДЫ 👥\n"
+                "• Отряд первые: @Andreyka_Bogdanov\n"
+                "  — @Madara_Damirov\n"
+                "  — @Paxan_Marlboro\n"
+                "  — @Stas_Kapibarov\n\n"
+                "🛡️ ОХРАНА / ВОДИТЕЛИ 🛡️\n"
+                "• Охрана#1: [Вакансия свободна]\n"
+                "• Охрана#2: @Magish_Wenzzexov\n"
+                "• Водители: @Vova_Arrows\n\n"
+                "📦 ДОСТАВЩИКИ / АРЕНДАТОРЫ 📦\n"
+                "• Арендатор: @Alexs_Zews\n"
+                "• Доставщик: @Dima_Sergervicn"
+            )
+            send_message(user_id, staff_text)
+
 
         elif text == "📁 Договор" and user_id in authorized_admins:
             send_message(user_id, "📁 Файл [Договор]:\nШаблон договора купли-продажи магазина находится в архиве.")
