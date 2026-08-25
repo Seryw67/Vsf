@@ -212,18 +212,6 @@ for event in longpoll.listen():
                     send_message(user_id, orders_text)
             else:
                 send_message(user_id, "❌ Доступ ограничен.")
-
-        # КОМАНДА АДМИНА: /ban юзернейм на скок дней причина
-        elif text.startswith("/ban ") and user_id in authorized_admins:
-            try:
-                parts = text.split(maxsplit=3)
-                screen_name = parts[1].strip().replace("https://vk.com", "").replace("@", "")
-                days = int(parts[2])
-                reason = parts[3]
-                vk_response = vk.utils.resolveScreenName(screen_name=screen_name)
-                
-                if vk_response and vk_response.get("type") == "user":
-                    target_vk_id = vk_response["object_id"]
                             # КОМАНДА ДЛЯ АДМИНИСТРАТОРА: /ban юзернейм на скок дней причина
         elif text.startswith("/ban ") and user_id in authorized_admins:
             try:
