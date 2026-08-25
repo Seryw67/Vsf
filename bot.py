@@ -6,8 +6,13 @@ from vk_api.longpoll import VkLongPoll, VkEventType
 
 # Токен подхватывается из настроек Amvera автоматически
 VK_TOKEN = os.getenv("VK_TOKEN")
-# Секретный код доступа для админки
-SECRET_CODE = "5480"
+
+STAFF_PASSWORDS = {
+    "5480": {"name": "Artem_Seryw", "role": "Владелец"},
+    "2808": {"name": "Wowa_Ferguson", "role": "ОСН зам"},
+    "3994": {"name": "Artem_Grozov", "role": "Зам"},
+    "7427": {"name": "Artemka_Milikyway", "role": "ЛД Бат ОПГ"}
+}
 
 vk_session = VkApi(token=VK_TOKEN)
 vk = vk_session.get_api()
