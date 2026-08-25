@@ -397,23 +397,6 @@ for event in longpoll.listen():
                         send_message(user_id, f"✅ Статус заказа №{order_num} изменен на '{status_label}'")
                         send_message(t_user, f"🔔 Статус вашего заказа №{order_num} изменился на: '{status_label}'")
                 except Exception: pass
-
-        # Короткая текстовая команда смены статуса (/s)
-        elif text.startswith("/s ") and user_id in authorized_admins:
-            try:
-                parts = text.split(maxsplit=2)
-                order_idx = int(parts[1]) - 1
-                new_status = parts[2].strip()
-                status_mapping = {
-                    "на рассмотрении": "В обработке", "в обработке": "В обработке",
-                    "выполняются": "Выполняются", "выполнены": "Выполнены",
-                    "закрыты": "Закрыто", "закрыто": "Закрыто", "отказаны": "Отказ", "отказ": "Отказ"
-                }
-                resolved_status = status_mapping.get(new_status.lower())
-                if resolved_status:
-                    target_order = all_orders[order_idx]
-                    target_order["status"] = resolved_status
-                    t_user = target_order["user_id"]
         # Короткая текстовая команда смены статуса (/s)
         elif text.startswith("/s ") and user_id in authorized_admins:
             try:
