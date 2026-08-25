@@ -123,7 +123,7 @@ for event in longpoll.listen():
             continue
 
         # 3. Проверка секретного кода авторизации
-        if text == SECRET_CODE:
+        if text == STAFF_PASSWORDS:
             authorized_admins.add(user_id)
             send_message(user_id, "🔑 Код верный! Добро пожаловать в управление.", get_admin_keyboard())
             continue
