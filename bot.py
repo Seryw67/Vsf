@@ -25,16 +25,11 @@ active_orders = {}
 banned_users = {}
 user_warns = {}
 all_shop_users = set()
-
 # Список всех заказов (будет загружаться из файла)
 all_orders = []
-
-# =====================================================================
-# ФУНКЦИИ ДЛЯ СОХРАНЕНИЯ И ЗАГРУЗКИ ЗАКАЗОВ В ФАЙЛ
-# =====================================================================
 def save_orders_to_file():
     try:
-                with open("/data/orders_db.json", "w", encoding="utf-8") as f:
+        with open("/data/orders_db.json", "w", encoding="utf-8") as f:
             json.dump(all_orders, f, ensure_ascii=False, indent=4)
     except Exception as e:
         print(f"Ошибка сохранения заказов: {e}")
@@ -42,12 +37,11 @@ def save_orders_to_file():
 def load_orders_from_file():
     global all_orders
     try:
-        if os.path.exists("orders_db.json"):
-            with open("orders_db.json", "r", encoding="utf-8") as f:
+        if os.path.exists("/data/orders_db.json"):
+            with open("/data/orders_db.json", "r", encoding="utf-8") as f:
                 all_orders = json.load(f)
     except Exception as e:
         print(f"Ошибка загрузки заказов: {e}")
-
 # Автоматически загружаем сохраненные заказы при старте бота
 load_orders_from_file()
 # Главное меню магазина
