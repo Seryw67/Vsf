@@ -172,18 +172,28 @@ for event in longpoll.listen():
                     response += "------------------------\n"
                 send_message(user_id, response)
 
-        elif text.startswith("/c "):
+               elif text.startswith("/c "):
             try:
-                order_num = int(text.split())
+                # Берем только вторую часть строки (сам номер заказа)
+                parts = text.split()
+                if len(parts) < 2:
+                    send_message(user_id, "❌ Укажите номер заказа! Пример: /c 1")
+                    continue
+                    
+                order_num = int(parts[1])
                 target_order = next((o for o in all_orders if o["id"] == order_num and o["user_id"] == user_id), None)
+                
                 if target_order and target_order["status"] == "В обработке":
                     target_order["status"] = "Отказ"
                     save_orders_to_file()
                     prod = target_order["product"]
                     if user_id in active_orders and prod in active_orders[user_id]: del active_orders[user_id][prod]
                     send_message(user_id, f"🔴 Вы успешно закрыли заказ №{order_num}. Товар '{prod}' снова доступен.", get_main_keyboard())
-                else: send_message(user_id, "❌ Заказ не найден или его нельзя закрыть.")
-            except Exception: send_message(user_id, "❌ Формат: /c [номер]")
+                else: 
+                    send_message(user_id, "❌ Заказ не найден в вашем списке или его нельзя закрыть.")
+            except Exception: 
+                send_message(user_id, "❌ Неверный формат! Используйте: /c [номер]")
+
 
         elif text == "Вход в ID":
             if user_id in authorized_admins: send_message(user_id, "Вы уже авторизованы. Меню admin:", get_admin_keyboard())
