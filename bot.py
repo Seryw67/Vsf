@@ -34,7 +34,7 @@ all_orders = []
 # =====================================================================
 def save_orders_to_file():
     try:
-        with open("orders_db.json", "w", encoding="utf-8") as f:
+                with open("/data/orders_db.json", "w", encoding="utf-8") as f:
             json.dump(all_orders, f, ensure_ascii=False, indent=4)
     except Exception as e:
         print(f"Ошибка сохранения заказов: {e}")
