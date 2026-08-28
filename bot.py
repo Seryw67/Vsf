@@ -139,9 +139,48 @@ for event in longpoll.listen():
             welcome_msg = f"🔑 Код верный!\n👤 Сотрудник: {staff_info['name']}\n💼 Должность: {staff_info['role']}\n\nДобро пожаловать в управление."
             send_message(user_id, welcome_msg, get_admin_keyboard())
             continue
-        # 4. Перехват ввода количества товара и расчет стоимости
+              # 4. Перехват ввода количества товара
         if user_id in user_modes:
-            mode_data = user_modes[user_id]
+            current_mode = user_modes[user_id]
+            product_name = "☕ Чай" if current_mode == "wait_tea_count" else "🎭 Маски"
+            price_per_item = 2500 if current_mode == "wait_tea_count" else 15000
+            
+            if not text.isdigit():
+                send_message(user_id, "❌ Введите число цифрами:")
+                continue
+            count = int(text)
+            
+            if current_mode == "wait_tea_count" and (count < 1 or count > 100):
+                send_message(user_id, "❌ Количество чая должно быть от 1 до 100. Введите еще раз:")
+                continue
+            elif current_mode == "wait_masks_count" and (count < 1 or count > 20):
+                send_message(user_id, "❌ Количество масок должно быть от 1 до 20. Введите еще раз:")
+                continue
+            
+            if user_id not in active_orders: active_orders[user_id] = {}
+            active_orders[user_id][product_name] = "В обработке"
+            
+            total_price = count * price_per_item
+            order_id = len(all_orders) + 1
+            current_date_str = datetime.now().strftime("%d.%m.%Y %H:%M")
+
+            all_orders.append({
+                "id": order_id, "user_id": user_id, "product": product_name,
+                "count": count, "price": total_price, "date": current_date_str, "status": "В обработке"
+            })
+            
+            # Автоматически сохраняем новый заказ в вечную папку /data
+            save_orders_to_file()
+            
+            del user_modes[user_id]
+            send_message(user_id, f"✅ Заказ №{order_id} оформлен!\nТовар: {product_name}\nКоличество: {count} шт.\n💰 Сумма: {total_price:,} руб.\nСтатус: На рассмотрении.", get_main_keyboard())
+            
+            admin_alert = f"🔔 Новый заказ №{order_id}!\n👤 Покупатель: {user_id}\n📦 Товар: {product_name} ({count} шт.)\n💵 Сумма: {total_price:,} руб."
+            for admin in authorized_admins:
+                try: send_message(admin, admin_alert)
+                except Exception: pass
+            continue
+
             
             # ШАГ 2: Бот получил ник, теперь спрашивает и проверяет количество
             if mode_data["step"] == "wait_count":
